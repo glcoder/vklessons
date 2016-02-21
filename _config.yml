@@ -1,0 +1,23 @@
+title:       "Vulkan Lessons"
+subtitle:    "Уроки и материалы по Vulkan API"
+author:      "Artem Gurevich"
+email:       "gurevichae@gmail.com"
+baseurl:     "/vklessons"
+url:         "http://glcoder.github.io"
+description: "OpenGL and Vulkan API programming tutorials and study materials."
+
+encoding:      utf-8
+permalink:     pretty
+paginate_path: /page:num
+timezone:      Europe/Moscow
+markdown:      kramdown
+highlighter:   rouge
+
+kramdown:
+  input:     GFM
+  hard_wrap: false
+
+defaults:
+  values:
+    author: "Artem Gurevich"
+    layout: "default"

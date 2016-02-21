@@ -1,0 +1,21 @@
+---
+layout: default
+---
+<div class="blog-header">
+  <h1 class="blog-title">{{ site.title }}</h1>
+  <p class="lead blog-description">{{ site.subtitle }}</p>
+</div> <!-- /.blog-header -->
+{% for n_post in site.posts %}
+<div class="blog-post">
+  <h3>
+    <a href="{{ n_post.url | prepend: site.baseurl }}">{{ n_post.title }}</a>
+    <small>{{ n_post.date | date: "%d.%m.%Y" }}</small>
+  </h3>
+  {% if n_post.excerpt %}
+    {% if n_post.thumbnail %}
+      <p><img class="img-thumbnail" src="{{ n_post.thumbnail | prepend: site.baseurl }}"></p>
+    {% endif %}
+    <p>{{ n_post.excerpt | strip_html | strip_newlines }}</p>
+  {% endif %}
+</div>
+{% endfor %}
