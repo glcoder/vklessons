@@ -1,38 +1,40 @@
 #pragma once
 
-#ifdef _WIN32
-#define VK_USE_PLATFORM_WIN32_KHR
-#else
-#define VK_USE_PLATFORM_XCB_KHR
-#endif
-
-#define VK_NO_PROTOTYPES
-#include <vulkan/vulkan.h>
-
 #include <memory>
 #include <vector>
 
+#include <render/Common.hpp>
+
 namespace vkl {
-	typedef void * LibraryHandle;
+	class Render;
+	class PhysicalDevice;
 
 	class RenderInstance {
 	public:
-		static std::shared_ptr<RenderInstance> Create();
+		static std::shared_ptr<RenderInstance> Create(std::shared_ptr<Render> render);
 
-		RenderInstance();
+		RenderInstance(std::shared_ptr<Render> render);
 		~RenderInstance();
 
-		PFN_vkGetInstanceProcAddr                  GetInstanceProcAddr                  = nullptr;
-		PFN_vkCreateInstance                       CreateInstance                       = nullptr;
-		PFN_vkDestroyInstance                      DestroyInstance                      = nullptr;
-		PFN_vkEnumerateInstanceLayerProperties     EnumerateInstanceLayerProperties     = nullptr;
-		PFN_vkEnumerateInstanceExtensionProperties EnumerateInstanceExtensionProperties = nullptr;
+		std::shared_ptr<Render> getRender() const {
+			return m_render;
+		}
+
+		VkInstance getInstance() const {
+			return m_instance;
+		}
+
+		std::vector<std::shared_ptr<PhysicalDevice>> const & getDevices() const {
+			return m_devices;
+		}
+
+		PFN_vkDestroyInstance          DestroyInstance          = nullptr;
+		PFN_vkEnumeratePhysicalDevices EnumeratePhysicalDevices = nullptr;
 
 	private:
-		LibraryHandle m_library;
-		VkInstance    m_instance;
+		std::shared_ptr<Render> m_render;
+		VkInstance              m_instance;
 
-		std::vector<VkLayerProperties>     m_layers;
-		std::vector<VkExtensionProperties> m_extensions;
+		std::vector<std::shared_ptr<PhysicalDevice>> m_devices;
 	};
 }
