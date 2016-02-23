@@ -1,5 +1,4 @@
 #include <iostream>
-#include <algorithm>
 
 #include <Config.h>
 #include <render/Render.hpp>
@@ -96,9 +95,9 @@ namespace vkl {
 			return nullptr;
 		}
 
-		std::for_each(std::begin(devices), std::end(devices), [&instance](VkPhysicalDevice const & d){
-			instance->m_devices.push_back(PhysicalDevice::Create(instance, d));
-		});
+		for (VkPhysicalDevice const & device : devices) {
+			instance->m_devices.push_back(PhysicalDevice::Create(instance, device));
+		}
 
 		return instance;
 	}

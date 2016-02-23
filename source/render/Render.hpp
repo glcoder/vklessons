@@ -23,9 +23,9 @@ namespace vkl {
 			return m_extensions;
 		}
 
-		PFN_vkGetInstanceProcAddr                  GetInstanceProcAddr = nullptr;
-		PFN_vkCreateInstance                       CreateInstance = nullptr;
-		PFN_vkEnumerateInstanceLayerProperties     EnumerateInstanceLayerProperties = nullptr;
+		PFN_vkGetInstanceProcAddr                  GetInstanceProcAddr                  = nullptr;
+		PFN_vkCreateInstance                       CreateInstance                       = nullptr;
+		PFN_vkEnumerateInstanceLayerProperties     EnumerateInstanceLayerProperties     = nullptr;
 		PFN_vkEnumerateInstanceExtensionProperties EnumerateInstanceExtensionProperties = nullptr;
 
 	private:

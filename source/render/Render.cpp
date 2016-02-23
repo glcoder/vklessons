@@ -1,5 +1,4 @@
 #include <iostream>
-#include <algorithm>
 
 #include <render/Render.hpp>
 
@@ -67,13 +66,13 @@ namespace vkl {
 		}
 
 		std::cout << "Available Vulkan layers:" << std::endl;
-		std::for_each(std::begin(instance->m_layers), std::end(instance->m_layers), [](VkLayerProperties const & l){
-			std::cout << l.layerName <<
-				" " << VKL_FORMAT_VERSION(l.specVersion) <<
-				" " << VKL_FORMAT_VERSION(l.implementationVersion) <<
-				" " << l.description <<
+		for (VkLayerProperties const & layer : instance->m_layers) {
+			std::cout << layer.layerName <<
+				" " << VKL_FORMAT_VERSION(layer.specVersion) <<
+				" " << VKL_FORMAT_VERSION(layer.implementationVersion) <<
+				" " << layer.description <<
 				std::endl;
-		});
+		}
 		std::cout << std::endl;
 
 		uint32_t extensionsCount = 0;
@@ -92,9 +91,11 @@ namespace vkl {
 		}
 
 		std::cout << "Available Vulkan extensions:" << std::endl;
-		std::for_each(std::begin(instance->m_extensions), std::end(instance->m_extensions), [](VkExtensionProperties const & e){
-			std::cout << e.extensionName << " " << VKL_FORMAT_VERSION(e.specVersion) << std::endl;
-		});
+		for (VkExtensionProperties const & extension : instance->m_extensions) {
+			std::cout << extension.extensionName <<
+				" " << VKL_FORMAT_VERSION(extension.specVersion) <<
+				std::endl;
+		}
 		std::cout << std::endl;
 
 		return instance;
