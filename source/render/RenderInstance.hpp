@@ -6,35 +6,45 @@
 #include <render/Common.hpp>
 
 namespace vkl {
-	class Render;
-	class PhysicalDevice;
+	typedef void * LibraryHandle;
 
 	class RenderInstance {
 	public:
-		static std::shared_ptr<RenderInstance> Create(std::shared_ptr<Render> render);
+		static std::shared_ptr<RenderInstance> Create();
 
-		RenderInstance(std::shared_ptr<Render> render);
+		RenderInstance();
 		~RenderInstance();
-
-		std::shared_ptr<Render> getRender() const {
-			return m_render;
-		}
 
 		VkInstance getInstance() const {
 			return m_instance;
 		}
 
-		std::vector<std::shared_ptr<PhysicalDevice>> const & getDevices() const {
+		std::vector<VkPhysicalDevice> const & getDevices() const {
 			return m_devices;
 		}
 
-		PFN_vkDestroyInstance          DestroyInstance          = nullptr;
-		PFN_vkEnumeratePhysicalDevices EnumeratePhysicalDevices = nullptr;
+		// get from dynamic library
+		PFN_vkGetInstanceProcAddr                  GetInstanceProcAddr                  = nullptr;
+
+		// get from GetInstanceProcAddr with null instance
+		PFN_vkCreateInstance                       CreateInstance                       = nullptr;
+		PFN_vkEnumerateInstanceLayerProperties     EnumerateInstanceLayerProperties     = nullptr;
+		PFN_vkEnumerateInstanceExtensionProperties EnumerateInstanceExtensionProperties = nullptr;
+
+		// get from GetInstanceProcAddr with not null instance
+		PFN_vkDestroyInstance                      DestroyInstance                      = nullptr;
+		PFN_vkEnumeratePhysicalDevices             EnumeratePhysicalDevices             = nullptr;
+		PFN_vkGetPhysicalDeviceFeatures            GetPhysicalDeviceFeatures            = nullptr;
+		PFN_vkGetPhysicalDeviceProperties          GetPhysicalDeviceProperties          = nullptr;
+		PFN_vkEnumerateDeviceLayerProperties       EnumerateDeviceLayerProperties       = nullptr;
+		PFN_vkEnumerateDeviceExtensionProperties   EnumerateDeviceExtensionProperties   = nullptr;
+		PFN_vkGetDeviceProcAddr                    GetDeviceProcAddr                    = nullptr;
+		PFN_vkCreateDevice                         CreateDevice                         = nullptr;
 
 	private:
-		std::shared_ptr<Render> m_render;
-		VkInstance              m_instance;
+		LibraryHandle m_library;
+		VkInstance    m_instance;
 
-		std::vector<std::shared_ptr<PhysicalDevice>> m_devices;
+		std::vector<VkPhysicalDevice> m_devices;
 	};
 }
