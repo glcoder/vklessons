@@ -1,11 +1,12 @@
 #include <iostream>
 
 #include <render/RenderInstance.hpp>
+#include <render/PhysicalDevice.hpp>
 #include <render/RenderDevice.hpp>
 
 #define VKL_GET_PROC_DEVICE(__name) \
-	instance->__name = (PFN_vk ## __name)instance->m_instance->GetDeviceProcAddr(instance->m_device, "vk" # __name); \
-	if (!instance->__name) { \
+	renderDevice->__name = (PFN_vk ## __name)physicalDevice->getInstance()->GetDeviceProcAddr(renderDevice->m_device, "vk" # __name); \
+	if (!renderDevice->__name) { \
 		std::cerr << "vkGetDeviceProcAddr(vk " #__name ") failed" << std::endl; \
 		return nullptr; \
 	}
@@ -35,8 +36,8 @@ static char const * vklRequiredExtensions[] = {
 static uint32_t const vklRequiredExtensionsSize = sizeof vklRequiredExtensions / sizeof vklRequiredExtensions[0];
 
 namespace vkl {
-	RenderDevice::RenderDevice(std::shared_ptr<RenderInstance> renderInstance, VkPhysicalDevice physicalDevice)
-		: m_instance(renderInstance), m_physicalDevice(physicalDevice), m_device(nullptr) {
+	RenderDevice::RenderDevice(std::shared_ptr<PhysicalDevice> physicalDevice)
+		: m_physicalDevice(physicalDevice), m_device(nullptr) {
 	}
 
 	RenderDevice::~RenderDevice() {
@@ -45,11 +46,8 @@ namespace vkl {
 		}
 	}
 
-	std::shared_ptr<RenderDevice> RenderDevice::Create(std::shared_ptr<RenderInstance> renderInstance, VkPhysicalDevice physicalDevice) {
-		std::shared_ptr<RenderDevice> instance = std::make_shared<RenderDevice>(renderInstance, physicalDevice);
-
-		VkPhysicalDeviceFeatures features = {};
-		renderInstance->GetPhysicalDeviceFeatures(physicalDevice, &features);
+	std::shared_ptr<RenderDevice> RenderDevice::Create(std::shared_ptr<PhysicalDevice> physicalDevice) {
+		std::shared_ptr<RenderDevice> renderDevice = std::make_shared<RenderDevice>(physicalDevice);
 
 		VkDeviceCreateInfo const createInfo = {
 			VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
@@ -61,11 +59,11 @@ namespace vkl {
 			vklRequiredLayers,
 			vklRequiredExtensionsSize,
 			vklRequiredExtensions,
-			&features
+			&physicalDevice->getFeatures()
 		};
 
-		VkResult const createResult = renderInstance->CreateDevice(physicalDevice, &createInfo, nullptr, &instance->m_device);
-		if (createResult != VK_SUCCESS || !instance->m_device) {
+		VkResult const createResult = physicalDevice->getInstance()->CreateDevice(physicalDevice->getDeivce(), &createInfo, nullptr, &renderDevice->m_device);
+		if (createResult != VK_SUCCESS || !renderDevice->m_device) {
 			std::cerr << "vkCreateDevice failed: " << FormatResult(createResult) << std::endl;
 			return nullptr;
 		}
@@ -73,6 +71,6 @@ namespace vkl {
 		VKL_GET_PROC_DEVICE(DestroyDevice);
 		VKL_GET_PROC_DEVICE(DeviceWaitIdle);
 
-		return instance;
+		return renderDevice;
 	}
 }

@@ -2,21 +2,22 @@
 
 #include <Config.h>
 #include <render/RenderInstance.hpp>
+#include <render/PhysicalDevice.hpp>
 
 // runtime helper functions (source https://github.com/glfw/glfw)
 #ifdef _WIN32
 #include <windows.h>
 
-#define _vkl_OpenLibrary(name) LoadLibraryA(name)
-#define _vkl_CloseLibrary(handle) FreeLibrary((HMODULE) handle)
+#define _vkl_OpenLibrary(name)            LoadLibraryA(name)
+#define _vkl_CloseLibrary(handle)         FreeLibrary((HMODULE) handle)
 #define _vkl_GetProcAddress(handle, name) GetProcAddress((HMODULE) handle, name)
 
 static char const * _vkl_LibraryName = "vulkan-1.dll";
 #else
 #include <dlfcn.h>
 
-#define _vkl_OpenLibrary(name) dlopen(name, RTLD_LAZY | RTLD_LOCAL)
-#define _vkl_CloseLibrary(handle) dlclose(handle)
+#define _vkl_OpenLibrary(name)            dlopen(name, RTLD_LAZY | RTLD_LOCAL)
+#define _vkl_CloseLibrary(handle)         dlclose(handle)
 #define _vkl_GetProcAddress(handle, name) dlsym(handle, name)
 
 static char const * _vkl_LibraryName = "libvulkan.so.1";
@@ -60,6 +61,9 @@ static char const * vklRequiredExtensions[] = {
 static uint32_t const vklRequiredExtensionsSize = sizeof vklRequiredExtensions / sizeof vklRequiredExtensions[0];
 
 namespace vkl {
+	void PrintLayersInformation(std::shared_ptr<RenderInstance> instance);
+	void PrintExtensionsInformation(std::shared_ptr<RenderInstance> instance);
+
 	RenderInstance::RenderInstance()
 		: m_library(nullptr), m_instance(nullptr) {
 	}
@@ -72,10 +76,6 @@ namespace vkl {
 			_vkl_CloseLibrary(m_library);
 		}
 	}
-
-	void PrintLayersInformation(std::shared_ptr<RenderInstance> instance);
-	void PrintExtensionsInformation(std::shared_ptr<RenderInstance> instance);
-	void PrintDevicesInformation(std::shared_ptr<RenderInstance> instance);
 
 	std::shared_ptr<RenderInstance> RenderInstance::Create() {
 		std::shared_ptr<RenderInstance> instance = std::make_shared<RenderInstance>();
@@ -106,7 +106,7 @@ namespace vkl {
 			VK_MAKE_VERSION(Config.Application.version, 0, 0),
 			Config.Framework.name,
 			VK_MAKE_VERSION(Config.Framework.version, 0, 0),
-			VK_API_VERSION,
+			VK_MAKE_VERSION(1, 0, 3),
 		};
 
 		VkInstanceCreateInfo const createInfo = {
@@ -135,8 +135,6 @@ namespace vkl {
 		VKL_GET_PROC_INSTANCE(GetDeviceProcAddr);
 		VKL_GET_PROC_INSTANCE(CreateDevice);
 
-		PrintDevicesInformation(instance);
-
 		uint32_t count = 0;
 		VkResult const countResult = instance->EnumeratePhysicalDevices(instance->m_instance, &count, nullptr);
 		if (countResult != VK_SUCCESS) {
@@ -144,11 +142,16 @@ namespace vkl {
 			return nullptr;
 		}
 
-		instance->m_devices.resize(count);
-		VkResult const result = instance->EnumeratePhysicalDevices(instance->m_instance, &count, instance->m_devices.data());
+		std::vector<VkPhysicalDevice> devices(count);
+		VkResult const result = instance->EnumeratePhysicalDevices(instance->m_instance, &count, devices.data());
 		if (result != VK_SUCCESS) {
 			std::cerr << "vkEnumeratePhysicalDevices failed: " << FormatResult(result) << std::endl;
 			return nullptr;
+		}
+
+		instance->m_devices.reserve(count);
+		for (VkPhysicalDevice & device : devices) {
+			instance->m_devices.emplace_back(PhysicalDevice::Create(instance, device));
 		}
 
 		return instance;
@@ -199,35 +202,6 @@ namespace vkl {
 		for (VkExtensionProperties const & extension : extensions) {
 			std::cout << extension.extensionName <<
 				" | " << FormnatVersion(extension.specVersion) <<
-				std::endl;
-		}
-		std::cout << std::endl;
-	}
-
-	void PrintDevicesInformation(std::shared_ptr<RenderInstance> instance) {
-		uint32_t count = 0;
-		VkResult const countResult = instance->EnumeratePhysicalDevices(instance->getInstance(), &count, nullptr);
-		if (countResult != VK_SUCCESS) {
-			std::cerr << "vkEnumeratePhysicalDevices failed: " << FormatResult(countResult) << std::endl;
-			return;
-		}
-
-		std::vector<VkPhysicalDevice> devices(count);
-		VkResult const result = instance->EnumeratePhysicalDevices(instance->getInstance(), &count, devices.data());
-		if (result != VK_SUCCESS) {
-			std::cerr << "vkEnumeratePhysicalDevices failed: " << FormatResult(result) << std::endl;
-			return;
-		}
-
-		std::cout << "Vulkan physical devices:" << std::endl;
-		for (VkPhysicalDevice const & device : devices) {
-			VkPhysicalDeviceProperties properties = {};
-			instance->GetPhysicalDeviceProperties(device, &properties);
-
-			std::cout << properties.deviceName <<
-				" | " << FormatDeviceType(properties.deviceType) <<
-				" | " << FormnatVersion(properties.apiVersion) <<
-				" | " << FormnatVersion(properties.driverVersion) <<
 				std::endl;
 		}
 		std::cout << std::endl;

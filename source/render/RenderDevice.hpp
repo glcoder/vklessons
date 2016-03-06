@@ -5,20 +5,16 @@
 #include <render/Common.hpp>
 
 namespace vkl {
-	class RenderInstance;
+	class PhysicalDevice;
 
 	class RenderDevice {
 	public:
-		static std::shared_ptr<RenderDevice> Create(std::shared_ptr<RenderInstance> renderInstance, VkPhysicalDevice physicalDevice);
+		static std::shared_ptr<RenderDevice> Create(std::shared_ptr<PhysicalDevice> physicalDevice);
 
-		RenderDevice(std::shared_ptr<RenderInstance> renderInstance, VkPhysicalDevice physicalDevice);
+		RenderDevice(std::shared_ptr<PhysicalDevice> physicalDevice);
 		~RenderDevice();
 
-		std::shared_ptr<RenderInstance> getInstance() const {
-			return m_instance;
-		}
-
-		VkPhysicalDevice getPhysicalDevice() const {
+		std::shared_ptr<PhysicalDevice> getPhysicalDevice() const {
 			return m_physicalDevice;
 		}
 
@@ -31,8 +27,7 @@ namespace vkl {
 		PFN_vkDeviceWaitIdle DeviceWaitIdle = nullptr;
 
 	private:
-		std::shared_ptr<RenderInstance> m_instance;
-		VkPhysicalDevice                m_physicalDevice;
+		std::shared_ptr<PhysicalDevice> m_physicalDevice;
 		VkDevice                        m_device;
 	};
 }

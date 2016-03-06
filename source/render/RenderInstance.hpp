@@ -8,6 +8,8 @@
 namespace vkl {
 	typedef void * LibraryHandle;
 
+	class PhysicalDevice;
+
 	class RenderInstance {
 	public:
 		static std::shared_ptr<RenderInstance> Create();
@@ -19,7 +21,7 @@ namespace vkl {
 			return m_instance;
 		}
 
-		std::vector<VkPhysicalDevice> const & getDevices() const {
+		std::vector<std::shared_ptr<PhysicalDevice>> const & getDevices() const {
 			return m_devices;
 		}
 
@@ -45,6 +47,6 @@ namespace vkl {
 		LibraryHandle m_library;
 		VkInstance    m_instance;
 
-		std::vector<VkPhysicalDevice> m_devices;
+		std::vector<std::shared_ptr<PhysicalDevice>> m_devices;
 	};
 }
