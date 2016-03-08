@@ -1,35 +1,28 @@
 #include <iostream>
 
-#include <Config.h>
-#include <render/RenderInstance.hpp>
-#include <render/PhysicalDevice.hpp>
-#include <render/RenderDevice.hpp>
+#include <config.h>
+#include <render/instance.hpp>
+#include <render/physical_device.hpp>
+#include <render/device.hpp>
 
 int main(int ragc, char *argv[]) {
-	std::shared_ptr<vkl::RenderInstance> renderInstance = vkl::RenderInstance::Create();
-	if (!renderInstance || renderInstance->getDevices().empty()) {
-		std::cerr << "vkl::RenderInstance::Create() failed" << std::endl;
+	std::shared_ptr<vkl::instance_t> instance = vkl::instance_t::create();
+	if (!instance) {
+		std::cerr << "vkl::instance_t::create() failed" << std::endl;
 		return 1;
 	}
 
-	std::shared_ptr<vkl::PhysicalDevice> physicalDevice;
-	for (std::shared_ptr<vkl::PhysicalDevice> device : renderInstance->getDevices()) {
-		if (device->isDescrete()) {
-			physicalDevice = device;
-			break;
-		}
-	}
-
-	if (!physicalDevice) {
-		std::cerr << "No Descrete GPU found in system" << std::endl;
+	if (instance->devices().empty()) {
+		std::cerr << "No Vulkan Device found in system" << std::endl;
 		return 1;
 	}
 
-	std::shared_ptr<vkl::RenderDevice> renderDevice = vkl::RenderDevice::Create(physicalDevice);
-	if (!renderDevice) {
-		std::cerr << "vkl::RenderDevice::Create() failed" << std::endl;
+	std::shared_ptr<vkl::device_t> device = vkl::device_t::create(instance->devices().front());
+	if (!device) {
+		std::cerr << "vkl::device_t::create() failed" << std::endl;
 		return 1;
 	}
 
+	device->DeviceWaitIdle(device->handle());
 	return 0;
 }

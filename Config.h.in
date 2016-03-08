@@ -1,16 +1,16 @@
 #pragma once
 
 namespace vkl {
-	static struct {
+	static struct config_t {
 		struct {
 			char const *   name;
 			unsigned const version;
-		} Framework;
+		} framework;
 		struct {
 			char const *   name;
 			unsigned const version;
-		} Application;
-	} Config = {
+		} application;
+	} config = {
 		{"@FRAMEWORK_NAME@", @FRAMEWORK_VERSION@},
 		{"@APPLICATION_NAME@", @APPLICATION_VERSION@},
 	};

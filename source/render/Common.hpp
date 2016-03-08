@@ -11,10 +11,21 @@
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
-#include <Config.h>
+#include <config.h>
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(__a) (sizeof(__a)/sizeof((__a)[0]))
+#endif
 
 namespace vkl {
-	std::string const FormnatVersion(uint32_t version);
-	std::string const FormatResult(VkResult result);
-	std::string const FormatDeviceType(VkPhysicalDeviceType type);
+	namespace format {
+		std::string const version(uint32_t version);
+		std::string const result(VkResult result);
+		std::string const device_type(VkPhysicalDeviceType type);
+		std::string const memory_flags(VkMemoryPropertyFlags flags);
+		std::string const heap_flags(VkMemoryHeapFlags flags);
+		std::string const heap_size(uint64_t size);
+		std::string const queue_flags(VkQueueFlags flags);
+		std::string const extent(VkExtent3D extent);
+	}
 }
